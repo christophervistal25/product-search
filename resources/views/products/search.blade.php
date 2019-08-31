@@ -1,61 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>Document</title>
-</head>
-<body>
-	<input type="text" id="productBarcode">
-	<script>
+@extends('templates.master')
+@yield('title', 'Sample')
+@section('content')
 
-		class Reader {
-			static MAXIMUM_TIME_EXECUTION = 4;
+	<label for="productName">Name</label>
+	<input type="text" readonly id="productName" placeholder="Product name...">
+	<br>
+	<label for="productDescription">Description</label>
+	<textarea name="description" readonly id="productDescription" cols="30" rows="10" placeholder="Product Description..."></textarea>
+	<br>
+	<label for="productPrice">Price</label>
+	<input type="number" readonly id="productPrice" placeholder="Product name...">
 
-			constructor() {
-				this.code = '';
-				this.keysTimeStamp = [];
-				this.codeFirstDigit = '';
-			}
-
-			finish() {
-				return window.event.code === 'Enter';
-			}
-
-			setCode(value) {
-				if (!this.validate()) {
-					this.code = '';
-					this.codeFirstDigit = value;
-				} else {
-					this.code += (value === 'Enter') ? value.replace('Enter', '') : value;	
+	@push('scripts')
+		<script>
+			const barcodeReader = new Reader();
+			document.addEventListener('keypress', (event) => {
+				barcodeReader.read();
+				if (barcodeReader.finish() && barcodeReader.strict().onlyScanner()) {
+					axios.get(`/products/${barcodeReader.getCode()}`)
+						.then(res => {
+							document.querySelector('#productName').value        = res.data.name;
+							document.querySelector('#productDescription').value = res.data.description;
+							document.querySelector('#productPrice').value       = res.data.price;
+						})
+						.catch((err) => {
+							// Can't Find the product.
+							if ( err.response.status == 404 ) {
+								console.log(`Can't find product by ${barcodeReader.getCode()} code`);
+							}
+						});
 				}
-			}
-
-			getCode() {
-				let barcode = this.code;
-				this.code = '';
-				return this.codeFirstDigit + barcode;
-			}
-
-			read() {
-				this.keysTimeStamp.push(window.event.timeStamp);
-				this.setCode(window.event.key);
-			}
-
-			validate() {
-				let [lastDigit, enterKey] = this.keysTimeStamp.slice(-2);
-				return (enterKey - lastDigit) <= Reader.MAXIMUM_TIME_EXECUTION;
-			}
-
-		}
-
-		const barcodeReader = new Reader();
-		document.addEventListener('keypress', (event) => {
-			barcodeReader.read();
-			if (barcodeReader.finish() && barcodeReader.validate()) {
-				console.log(barcodeReader.getCode());
-			}
-		});
-
-	</script>
-</body>
-</html>
+			});
+		</script>
+	@endpush
+@endsection

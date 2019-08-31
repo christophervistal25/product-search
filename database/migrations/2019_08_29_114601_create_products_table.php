@@ -17,6 +17,8 @@ class CreateProductsTable extends Migration
             $table->bigIncrements('id');
             $table->string('barcode')->unique();
             $table->string('name');
+            $table->string('description');
+            $table->decimal('price', 8, 2);
             $table->timestamps();
         });
     }
