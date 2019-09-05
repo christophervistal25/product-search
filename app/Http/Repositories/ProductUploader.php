@@ -9,6 +9,6 @@ class ProductUploader implements ProductUploaderContract
 {
     public function upload(FormatterContract $formatter, string $content)
     {
-        return DB::insert('INSERT INTO products(name, description, price, barcode) VALUES ' . $formatter->format($content));
+        return DB::insert('REPLACE INTO products(name, description, price, barcode) VALUES ' . $formatter->format($content));
     }
 }

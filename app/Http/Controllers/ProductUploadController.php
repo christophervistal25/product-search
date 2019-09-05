@@ -27,6 +27,7 @@ class ProductUploadController extends Controller
     public function upload(UploadRequest $request)
     {
         $file = file_get_contents($request->file('product_csv'));
+        $products = Product::pluck('barcode')->toArray();
         $this->uploader->upload($this->formatter, $file);
         return back()->with('success', 'Succesfully upload all content from CSV');
     }
