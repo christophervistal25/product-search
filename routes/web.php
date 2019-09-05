@@ -15,3 +15,5 @@ Route::group(['prefix' => 'products'], function () {
 	Route::get('/{product}', 'ProductController@show');
 });
 
+Route::resource('category', 'CategoryController');
+
